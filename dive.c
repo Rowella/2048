@@ -26,7 +26,7 @@ game moveLeft(game board);
 game rotateClockwise(game board);
 game newTile(game board);
 game makeNewBoard(void);
-void printBoard(game board);
+game printBoard(game board);
 game makeAction(game board, char move);
 game evalPairs(game board);
 int findWin(game board);
@@ -35,7 +35,7 @@ int anyNext(game board);
 int main(int argc, char *argv[]) {
 	srand(time(NULL));
 	game board = makeNewBoard();
-    printBoard(board);
+    board = printBoard(board);
     printf(">>> ");
     while (findWin(board) == NONE || findWin(board) == FULL) {
         char move = getchar();
@@ -44,11 +44,11 @@ int main(int argc, char *argv[]) {
             move = getchar();
         }
 		board = makeAction(board, move);
-		printBoard(board);
+		board = printBoard(board);
         printf("\n");
 	}
 
-    printBoard(board);
+    board = printBoard(board);
     if (findWin(board) == WIN) {
         printf("YOU WIN!\n");
     } else {
@@ -113,7 +113,7 @@ game makeNewBoard(void){
 	return newBoard;
 }
 
-void printBoard(game board) {
+game printBoard(game board) {
 	int row = 0;
 	int col = 0;
 	while (row < SIZE) {
@@ -123,8 +123,16 @@ void printBoard(game board) {
                 printf(".     ");
             } else {
                 char toPrint[15];
-                sprintf(toPrint, "%d", board.board[row][col]);
-                printf(toPrint);
+                if (board.board[row][col] > 2*WIN_NUM) {
+                    printf("\e[32;1m");
+                    board.board[row][col] -= 2*WIN_NUM;
+                    sprintf(toPrint, "%d", board.board[row][col]);
+                    printf(toPrint);
+                    printf("\e[39;49m");
+                } else {
+                    sprintf(toPrint, "%d", board.board[row][col]);
+                    printf(toPrint);
+                }
                 int counter = strlen(toPrint);
                 while (counter < 6) {
                     printf(" ");
@@ -136,6 +144,7 @@ void printBoard(game board) {
 		printf("\n");
 		row++;
 	}
+    return board;
 }
 
 game makeAction(game board, char move) {
@@ -186,7 +195,7 @@ int findWin(game board) {
 	while (row < SIZE) {
 		col = 0;
 		while (col < SIZE) {
-			if (board.board[row][col] >= WIN_NUM) {
+			if (board.board[row][col] >= WIN_NUM && board.board[row][col] < 2*WIN_NUM) {
                 isWin = WIN;
             } else if (board.board[row][col] == 0 && isWin == LOSE){
 				isWin = NONE;
@@ -216,13 +225,13 @@ game newTile(game board) {
 
         int chance = rand()%TOTAL_CHANCE;
         if (chance < TWO_CHANCE) {
-            newGame.board[row][col] = 2;
+            newGame.board[row][col] = 2+2*WIN_NUM;
         } else if (chance < TWO_CHANCE + THREE_CHANCE){
-            newGame.board[row][col] = 3;
+            newGame.board[row][col] = 3+2*WIN_NUM;
         } else if (chance < TWO_CHANCE+THREE_CHANCE+FIVE_CHANCE) {
-            newGame.board[row][col] = 5;
+            newGame.board[row][col] = 5+2*WIN_NUM;
         } else {
-            newGame.board[row][col] = 7;
+            newGame.board[row][col] = 7+2*WIN_NUM;
         }
     }
 
